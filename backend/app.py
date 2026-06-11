@@ -31,10 +31,17 @@ skills_db = [
 def generatingResumeInfo(text):
   text+='''   Extract project names and technologies from this resume text and
        Return JSON.'''
-  project= gemini.model.generte_content(
+  projects= gemini.model.generte_content(
     model="gemini-2.5-flash",
     contents=text
   )
+  skills='abc'
+  summary='abd'
+  return {
+    "skills":skills,
+    "summary":summary,
+    "projects":projects
+  }
   
 
 @app.post("/uploadResume")
@@ -45,7 +52,9 @@ def upload(pdf):
     text += page.extract_text()
   res=generatingResumeInfo(text)
   return {
-    "response":res
+    "summary":res.summary,
+    "skills":res.skills,
+    "projects":res.projects
   }
   
   
