@@ -5,7 +5,6 @@ from transformers import pipeline
 from pypdf import PdfReader
 from dotenv import load_dotenv
 import os
-import transformers
 
 load_dotenv()
 
@@ -14,10 +13,6 @@ app=FastAPI()
 gemini=genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
 summarizer=pipeline("summarization",model="facebook/bart-large-cnn")
-# skill_extract=pipeline(
-#     "token-classification",
-#     model="dslim/bert-base-NER"
-# )
 
 skills_db = [
     "Python",
@@ -25,8 +20,7 @@ skills_db = [
     "React",
     "FastAPI",
     "TensorFlow",
-    "Docker",
-    ...
+    "Docker"
 ]
 
 def chunk_text(text, chunk_size=800):
@@ -36,15 +30,22 @@ def Summar(text):
   chunks = chunk_text(text)
   summaries = []
   for chunk in chunks:
-    result = summarizer(chunk, max_length=150, min_length=50)
+    result = summarizer(chunk)
     summaries.append(result[0]["summary_text"])
   final_summary = " ".join(summaries)
   return final_summary
 
+def skill(text):
+  found_skills = []
+  for skill in skills_db:
+    if skill.lower() in text.lower():
+        found_skills.append(skill)
+  return found_skills
 
 
 def generatingResumeInfo(text):
   summary=Summar(text)
+  skills=skill(text)
   text+='''   Extract project names and technologies from this resume text and
        Return JSON.'''
   # projects= gemini.model.generte_content(
@@ -52,7 +53,6 @@ def generatingResumeInfo(text):
   #   contents=text
   # )
   projects={"project1":"cropcare"}
-  skills='abc'
   return {
     "skills":skills,
     "summary":summary,
@@ -73,6 +73,9 @@ def upload(file: UploadFile = File(...)):
     "projects": res["projects"]
   }
 
+@app.get("/generateQue")
+def QGeneration():
+  pass
   
 
 
