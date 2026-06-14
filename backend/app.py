@@ -15,16 +15,18 @@ gemini=genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 summarizer=pipeline("summarization",model="facebook/bart-large-cnn")
 
 skills_db = [
-    "Python",
-    "Java",
-    "React",
-    "FastAPI",
-    "TensorFlow",
-    "Docker"
+    "P y t h o n",
+    "J a v a",
+    "R e a c t",
+    "F a s t A P I",
+    "T e n s o r F l o w",
+    "D o c k e r"
 ]
 
 def chunk_text(text, chunk_size=800):
     return [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
+
+allData=""
 
 def Summar(text):
   chunks = chunk_text(text)
@@ -53,6 +55,8 @@ def generatingResumeInfo(text):
   #   contents=text
   # )
   projects={"project1":"cropcare"}
+
+  allData=summary+skills+projects
   return {
     "skills":skills,
     "summary":summary,
@@ -75,7 +79,26 @@ def upload(file: UploadFile = File(...)):
 
 @app.get("/generateQue")
 def QGeneration():
-  pass
+  allData+='''Based on these data of resume summary skills and projects
+           Generate 5 technical interview questions.
+            Return JSON.
+            and second JSON of its answer in order 
+            dont give other data just this two json in list form of python eg. [{"q1","q2"..}
+            ,{"ans1","ans2",..}]'''
+  # gen= gemini.model.generte_content(
+  #   model="gemini-2.5-flash",
+  #   contents=allData
+  # )
+  # Q=gen[0]
+  Q=[
+ "What is FastAPI?",
+ "Difference between list and tuple?",
+ "Explain React Virtual DOM",
+ "What is overfitting?",
+ "Explain REST API"
+  ]
+  return {"Questions":Q}
+  
   
 
 
