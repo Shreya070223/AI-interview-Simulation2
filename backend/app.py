@@ -2,6 +2,9 @@ from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 from google import genai
 from transformers import pipeline
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity 
+import numpy as np
 from pypdf import PdfReader
 from dotenv import load_dotenv
 import os
@@ -10,9 +13,16 @@ load_dotenv()
 
 app=FastAPI()
 
+class ansEve(BaseModel):
+  ans: list[str]
+
 gemini=genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
 summarizer=pipeline("summarization",model="facebook/bart-large-cnn")
+
+check=SentenceTransformer(
+    "all-MiniLM-L6-v2"
+)
 
 skills_db = [
     "P y t h o n",
@@ -27,6 +37,7 @@ def chunk_text(text, chunk_size=800):
     return [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
 
 allData=""
+ans=""
 
 def Summar(text):
   chunks = chunk_text(text)
@@ -90,6 +101,7 @@ def QGeneration():
   #   contents=allData
   # )
   # Q=gen[0]
+  # ans=gen[1]
   Q=[
  "What is FastAPI?",
  "Difference between list and tuple?",
@@ -98,7 +110,41 @@ def QGeneration():
  "Explain REST API"
   ]
   return {"Questions":Q}
-  
+
+def embedding(an):
+  embeddings=check.encode(an)
+  return embeddings
+
+@app.post("/ansSubmit")
+def submitAndEvaluate(Ans: ansEve):
+  score1=cosine_similarity(
+    embedding(Ans.ans[0]),
+    embedding(ans[0])
+   )[0][0]
+  score2=cosine_similarity(
+    embedding(Ans.ans[1]),
+    embedding(ans[1])
+   )[0][0]
+  score3=cosine_similarity(
+    embedding(Ans.ans[2]),
+    embedding(ans[2])
+   )[0][0]
+  score4=cosine_similarity(
+    embedding(Ans.ans[3]),
+    embedding(ans[3])
+   )[0][0]
+  score5=cosine_similarity(
+    embedding(Ans.ans[4]),
+    embedding(ans[4])
+   )[0][0]
+  return {
+    "q1":score1,
+    "q2":score2,
+    "q3":score3,
+    "q4":score4,
+    "q5":score5
+  }
+
   
 
 
