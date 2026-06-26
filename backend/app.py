@@ -18,8 +18,6 @@ class ansEve(BaseModel):
 
 gemini=genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
-summarizer=pipeline("summarization",model="facebook/bart-large-cnn")
-
 check=SentenceTransformer(
     "all-MiniLM-L6-v2"
 )
@@ -40,6 +38,7 @@ allData=""
 ans=""
 
 def Summar(text):
+  summarizer=pipeline("summarization",model="facebook/bart-large-cnn")
   chunks = chunk_text(text)
   summaries = []
   for chunk in chunks:
